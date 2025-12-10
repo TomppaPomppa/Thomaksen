@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [testing]
+    branches: [main, test]
   pull_request:
-    branches: [testing]
+    branches: [main, test]
 
 jobs:
   test:
@@ -25,9 +25,9 @@ jobs:
       - name: Run Vitest unit tests
         run: npm run test
 
-      - name: Run cyoress E2E tests
+      - name: Run cypress E2E tests
         uses: cypress-io/github-action@6
         with: 
           start: npm run dev
-          wait on: https://localhost:5173
+          wait-on: https://localhost:5173
           wait-on-timeout: 60
