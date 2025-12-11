@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-const Laskin = require('../laskin/laskin.js');
-
+// const Laskin = require('../laskin/laskin.js');
+import Laskin from '../laskin/laskin.js';
 describe('Laskimen testaus', function () {
   const laskin = Laskin;
 

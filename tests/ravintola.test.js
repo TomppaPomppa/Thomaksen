@@ -1,16 +1,19 @@
 import { assert, describe, expect, it } from 'vitest';
-const Ravintola = require('../ravintola/ravintola.js');
+import ravintola from '../ravintola/ravintola.js';
 
-describe('funktion testaus', () => {
-  const ravintola = Ravintola;
-  it('Tarkistetaan laskelasku-funktio', function () {
-    const summa = ravintola.laskeLasku(true, true, false);
-    expect(summa).toBe(14);
+describe('Ravintolasovelluksen testaus', function () {
+  it('should return correct sum from laskeLasku when customer picks main course, starter, dessert and no drink ', function () {
+    expect(ravintola.laskeLasku(true, true, false)).toBe(14);
   });
-
-  it('Tarkistetaan palautaTaulukonSatunnainenArvo-funktio', () => {
-    const rand = ravintola.palautaTaulukonSatunnainenArvo(ravintola.juomat);
-    const testitaulukko = ravintola.juomat;
-    assert.include(rand, testitaulukko, 'eipä ollu');
+  it('should return a value from one of the arrays in Ravintola (alkuruoat, paaruoat, jalkiruoat tai juomat.)', () => {
+    const testiArvoTaulukosta = ravintola.palautaTaulukonSatunnainenArvo(
+      ravintola.juomat
+    );
+    const taulukkoTestattavaksi = ravintola.juomat;
+    assert.include(
+      taulukkoTestattavaksi,
+      testiArvoTaulukosta,
+      'Taulukko ei sisällä arvoa'
+    );
   });
 });

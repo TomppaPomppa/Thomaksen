@@ -32,4 +32,4 @@ Laskin.prototype.miinusLasku = function (a, b) {
 
 const laskin = new Laskin();
 
-module.exports = laskin;
+export default laskin;

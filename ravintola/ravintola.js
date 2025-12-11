@@ -207,5 +207,4 @@ Ravintola.prototype.laskeLasku = function (
 
 const ravintola = new Ravintola();
 
-module.exports = ravintola;
-
+export default ravintola;
