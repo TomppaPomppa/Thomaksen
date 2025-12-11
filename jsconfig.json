@@ -5,7 +5,6 @@
     "lib": ["ES2021", "DOM"],
     "checkJs": false
   },
-  "include": ["public/**/*"],
+  "include": ["public/**/*", "ravintola", "laskin"],
   "exclude": ["node_modules"]
 }
-
