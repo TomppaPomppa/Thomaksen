@@ -4,20 +4,42 @@ OHJELMAKOODI
 */
 
 const Ravintola = function () {
-  this.alkuruoat = ['Tomaattikeitto', 'LeipÃ¤', 'Vihersalaatti', 'Salsa'];
-  this.paaruoat = [
-    'Kalakeitto',
-    'Makaroonilaatikko',
-    'Kasvispihvi',
-    'Kanasalaatti',
+  this.alkuruoat = [
+    {
+      ruoka: 'Tomaattikeitto',
+      hinta: 3,
+    },
+    { ruoka: 'Leipä', hinta: 4 },
+    {
+      ruoka: 'Vihersalaatti',
+      hinta: 5,
+    },
+    { ruoka: 'Salsa', hinta: 6 },
   ];
-  this.jalkiruoat = ['Hedelmäsalaatti', 'JÃ¤Ã¤telÃ¶', 'Pulla', 'Donitsi'];
-  this.juomat = ['Tee', 'Kahvi', 'Maito', 'Mehu'];
-  this.alkuruokaHinta = 4;
-  this.paaruokaHinta = 6;
-  this.jalkiruokaHinta = 4;
-  this.juomaHinta = 3;
+  this.paaruoat = [
+    { ruoka: 'Kalakeitto', hinta: 7 },
+    { ruoka: 'Makaroonilaatikko', hinta: 6 },
+    { ruoka: 'Kasvispihvi', hinta: 8 },
+    { ruoka: 'Kanasalaatti', hinta: 7 },
+  ];
+  this.jalkiruoat = [
+    { ruoka: 'Hedelmäsalaatti', hinta: 4 },
+    { ruoka: 'Jäätelö', hinta: 3 },
+    { ruoka: 'Pulla', hinta: 3 },
+    { ruoka: 'Donitsi', hinta: 3 },
+  ];
+  this.juomat = [
+    { ruoka: 'Tee', hinta: 2 },
+    { ruoka: 'Kahvi', hinta: 2 },
+    { ruoka: 'Maito', hinta: 2 },
+    { ruoka: 'Mehu', hinta: 3 },
+  ];
+  // this.alkuruokaHinta = 4;
+  // this.paaruokaHinta = 6;
+  // this.jalkiruokaHinta = 4;
+  // this.juomaHinta = 3;
   this.paikkojenMaara = 15;
+  this.paikat; // TÃ¤hÃ¤n muuttujaan paikkojen taulukko
 };
 
 /**
@@ -38,6 +60,8 @@ function generoiBoolean() {
  * @return {object} object array
  */
 Ravintola.prototype.syoRavintolassa = function (asiakkaidenMaara) {
+  this.varaaPaikat();
+
   const onTilaa = this.tarkistaPaikkojenMaara(asiakkaidenMaara);
   if (!onTilaa) {
     return;
@@ -91,6 +115,54 @@ Ravintola.prototype.tarkistaPaikkojenMaara = function (asiakkaidenMaara) {
     );
     return false;
   }
+};
+
+/**
+ * Luo Ravintolan paikat-muuttujaan uuden taulukon, jonka koko mÃ¤Ã¤rÃ¤ytyy paikkojenMaara-muuttujan mukaisesti,
+ * ja tÃ¤yttÃ¤Ã¤ taulukon boolean arvolla false.
+ */
+Ravintola.prototype.generoiPaikat = function () {
+  //Koodisi tÃ¤nne
+  this.paikat = new Array(this.paikkojenMaara).fill(false);
+};
+
+/**
+ * Pyörittää ensimmäiseksi generoiPaikat-funktion, jos paikat ei ole taulukko, ja varmistaa siellä olevan vähintään yksi arvo.
+ *  Sitten laskee vapaitten paikkojen määrän Falseista,ja palauttaa falsen, jos vapaita paikkoja on vähemmän kuin varattuja.
+ * Jos on vapaita paikkoja, aletaan vaihtamaan vapaiden paikkojen false-arvoja trueksi, ja palautetaan true.
+ */
+Ravintola.prototype.varaaPaikat = function (varauksenMaara) {
+  //Koodisi tÃ¤nne
+  if (!Array.isArray(this.paikat)) {
+    this.generoiPaikat();
+  }
+
+  if (typeof varauksenMaara === 'undefined') {
+    varauksenMaara = 1;
+  }
+
+  if (typeof varauksenMaara !== 'number') {
+    throw new TypeError();
+  }
+
+  const vapaat = this.paikat.reduce(
+    (count, paikka) => count + (paikka === false ? 1 : 0),
+    0
+  );
+
+  if (vapaat < varauksenMaara) {
+    return false;
+  }
+
+  let varatut = 0;
+  for (let i = 0; i < this.paikat.length && varatut < varauksenMaara; i++) {
+    if (this.paikat[i] === false) {
+      this.paikat[i] = true;
+      varatut++;
+    }
+  }
+
+  return true;
 };
 
 /**
@@ -168,41 +240,20 @@ Ravintola.prototype.palautaTaulukonSatunnainenArvo = function (taulukko) {
  *
  * Palauttaa lopussa 'loppuSumma'.
  *
- * @param {boolean} ottiAlkuruoan
- * @param {boolean} ottiJalkiruoan
- * @param {boolean} ottiJuoman
- * @return {number}
+ * param {boolean} ottiAlkuruoan
+ * param {boolean} ottiJalkiruoan
+ * param {boolean} ottiJuoman
+ * return {number}
  */
-Ravintola.prototype.laskeLasku = function (
-  ottiAlkuruoan,
-  ottiJalkiruoan,
-  ottiJuoman
-) {
-  if (
-    typeof ottiAlkuruoan !== 'boolean' ||
-    typeof ottiJalkiruoan !== 'boolean' ||
-    typeof ottiJuoman !== 'boolean'
-  ) {
-    throw new TypeError();
+Ravintola.prototype.laskeLasku = function (ruuat) {
+  // Jos kutsutaan uudella tavalla: annetaan tilauksen ruoat-taulukko
+  if (Array.isArray(ruuat)) {
+    return ruuat.reduce(
+      (sum, item) =>
+        sum + (item && typeof item.hinta === 'number' ? item.hinta : 0),
+      0
+    );
   }
-
-  let loppuSumma = 0;
-
-  loppuSumma += this.paaruokaHinta;
-
-  if (ottiAlkuruoan) {
-    loppuSumma += this.alkuruokaHinta;
-  }
-
-  if (ottiJalkiruoan) {
-    loppuSumma += this.jalkiruokaHinta;
-  }
-
-  if (ottiJuoman) {
-    loppuSumma += this.juomaHinta;
-  }
-
-  return loppuSumma;
 };
 
 const ravintola = new Ravintola();
