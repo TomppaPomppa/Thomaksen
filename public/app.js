@@ -251,3 +251,8 @@
   // Initial paint
   render();
 })();
+
+const app = (typeof window !== 'undefined' && window.app) || (function () {})();
+if (typeof window !== 'undefined') window.app = app;
+
+export default app;
