@@ -74,7 +74,17 @@
   const emptyState = /** @type {HTMLElement} */ (
     document.getElementById('empty-state')
   );
-
+  let currentFilterPriority = 'all';
+  const filterPriority = /** @type {HTMLSelectElement} */ (
+    document.getElementById('filter-priority')
+  );
+  if (filterPriority) {
+    filterPriority.value = 'all';
+    filterPriority.addEventListener('change', () => {
+      currentFilterPriority = filterPriority.value;
+      render();
+    });
+  }
   // State
   let tasks = loadTasks();
 
@@ -87,44 +97,51 @@
     }
     emptyState.style.display = 'none';
 
-    tasks
+    const ordered = tasks
+      .slice()
       .sort((a, b) => {
-        // Not-done first, then by priority (high->low), then newest first
+        // incomplete first, then by priority (high, medium, low), then by updatedAt desc
         if (a.completed !== b.completed) return a.completed ? 1 : -1;
-        const prioRank = { high: 0, medium: 1, low: 2 };
-        if (prioRank[a.priority] !== prioRank[b.priority]) {
-          return prioRank[a.priority] - prioRank[b.priority];
-        }
-        return b.createdAt - a.createdAt;
+        const order = { high: 0, medium: 1, low: 2 };
+        const pa = a.priority in order ? order[a.priority] : 3;
+        const pb = b.priority in order ? order[b.priority] : 3;
+        if (pa !== pb) return pa - pb;
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
       })
-      .forEach((t) => {
-        const li = document.createElement('li');
-        li.className = 'task' + (t.completed ? ' done' : '');
-        li.dataset.id = t.id;
-        li.innerHTML = `
-					<div>
-						<div class="title">${escapeHtml(t.topic)}</div>
-						<div class="desc">${escapeHtml(t.description || '')}</div>
-					</div>
-					<div class="meta">
-						<span class="badge prio-${t.priority}">
-							<span class="dot"></span>
-							${t.priority.charAt(0).toUpperCase() + t.priority.slice(1)}
-						</span>
-					</div>
-					<div class="meta">
-						${badgeForStatus(t.status)}
-					</div>
-					<div class="controls">
-						<button data-action="edit" class="secondary">Edit</button>
-						<button data-action="complete" class="${t.completed ? 'secondary' : ''}">
-							${t.completed ? 'Undo' : 'Complete'}
-						</button>
-						<button data-action="delete" class="danger">Delete</button>
-					</div>
-				`;
-        list.appendChild(li);
+      .filter((t) => {
+        return (
+          currentFilterPriority === 'all' ||
+          (t.priority && t.priority === currentFilterPriority)
+        );
       });
+    ordered.forEach((t) => {
+      const li = document.createElement('li');
+      li.className = 'task' + (t.completed ? ' done' : '');
+      li.dataset.id = t.id;
+      li.innerHTML = `
+    <div>
+      <div class="title">${escapeHtml(t.topic)}</div>
+      <div class="desc">${escapeHtml(t.description || '')}</div>
+    </div>
+    <div class="meta">
+      <span class="badge prio-${t.priority}">
+        <span class="dot"></span>
+        ${t.priority ? t.priority.charAt(0).toUpperCase() + t.priority.slice(1) : ''}
+      </span>
+    </div>
+    <div class="meta">
+      ${badgeForStatus(t.status)}
+    </div>
+    <div class="controls">
+      <button data-action="edit" class="secondary">Edit</button>
+      <button data-action="complete" class="${t.completed ? 'secondary' : ''}">
+        ${t.completed ? 'Undo' : 'Complete'}
+      </button>
+      <button data-action="delete" class="danger">Delete</button>
+    </div>
+  `;
+      list.appendChild(li);
+    });
   }
 
   function badgeForStatus(status) {
@@ -232,8 +249,8 @@
         status: nextCompleted
           ? 'done'
           : t.status === 'done'
-          ? 'todo'
-          : t.status,
+            ? 'todo'
+            : t.status,
         updatedAt: Date.now(),
       };
       saveTasks(tasks);

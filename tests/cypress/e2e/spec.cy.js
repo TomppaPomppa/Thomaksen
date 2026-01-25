@@ -117,4 +117,45 @@ describe('Todo app', () => {
       expect(tasks).to.have.length(0);
     });
   });
+  it('filters tasks by priority', () => {
+    // create high
+    cy.get('#topic').clear().type('High task');
+    cy.get('#description').clear().type('High desc');
+    cy.get('#priority').select('high');
+    cy.get('#save-btn').click();
+
+    // create medium
+    cy.get('#topic').clear().type('Medium task');
+    cy.get('#description').clear().type('Medium desc');
+    cy.get('#priority').select('medium');
+    cy.get('#save-btn').click();
+
+    // create low
+    cy.get('#topic').clear().type('Low task');
+    cy.get('#description').clear().type('Low desc');
+    cy.get('#priority').select('low');
+    cy.get('#save-btn').click();
+
+    // ensure all three created
+    cy.get('#task-list .task').should('have.length', 3);
+
+    // filter high
+    cy.get('#filter-priority').select('high');
+    cy.get('#task-list .task').should('have.length', 1);
+    cy.get('#task-list .task .title').should('contain', 'High task');
+
+    // filter medium
+    cy.get('#filter-priority').select('medium');
+    cy.get('#task-list .task').should('have.length', 1);
+    cy.get('#task-list .task .title').should('contain', 'Medium task');
+
+    // filter low
+    cy.get('#filter-priority').select('low');
+    cy.get('#task-list .task').should('have.length', 1);
+    cy.get('#task-list .task .title').should('contain', 'Low task');
+
+    // show all
+    cy.get('#filter-priority').select('all');
+    cy.get('#task-list .task').should('have.length', 3);
+  });
 });
